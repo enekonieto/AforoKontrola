@@ -1,0 +1,17 @@
+.table {
+	display: table;
+}
+.row {
+	display: table-row;
+}
+.cell {
+	display: table-cell;
+	width: 33%;
+	text-align: center;
+	padding: 20px;
+}
+
+.cell input {
+	width: 100px;
+	height: 40px;
+}
