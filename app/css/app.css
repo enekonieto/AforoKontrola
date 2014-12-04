@@ -1,3 +1,8 @@
+.error {
+	font-size: small;
+	color: #FF0000;
+}
+
 .table {
 	display: table;
 }

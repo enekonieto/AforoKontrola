@@ -1,0 +1,26 @@
+<form>
+	<p class="error">
+		{{ error }}
+	</p>
+
+	<div class="table">
+		<div class="row">
+			<div class="cell">
+				Erabiltzailea:
+			</div>
+			<div class="cell">
+				<input type="text" data-ng-model="user" />
+			</div>
+		</div>
+		<div class="row">
+			<div class="cell">
+				Pasahitza:
+			</div>
+			<div class="cell">
+				<input type="password" data-ng-model="pass" />
+			</div>
+		</div>
+	</div>
+
+	<input type="submit" value="Sartu" data-ng-click="funtzioaLogin(user, pass)" />
+</form>
