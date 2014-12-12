@@ -5,9 +5,23 @@
 var app = angular.module('AforoControllers', []);
 
 /**
+ * Konstanteak
+ */
+app.urlWebServices = 'https://localhost/AforoKontrola/web/ws.php';
+app.loginErrorCode = 3;
+
+/**
  * Login
  */
 app.controller('LoginController', function($scope, $http, $location) {
+	
+	var user = window.localStorage.getItem('user');
+	var pass = window.localStorage.getItem('pass');
+	if ((user != null) && (pass != null)) {
+		$scope.user = user;
+		$scope.pass = pass;
+		$scope.gogoratuLogin = true;
+	}
 	
 	/**
 	 * Erabiltzailea eta pasahitza bidali autentifikatzeko.
@@ -15,11 +29,18 @@ app.controller('LoginController', function($scope, $http, $location) {
 	 * @param pass Pasahitza
 	 */
 	$scope.funtzioaLogin = function(user, pass) {
+// var secret = window.localStorage.getItem('myApp.secret');
 		$http({
 			method : 'GET',
-			url : '../web/ws.php?op=login&user=' + $scope.user + '&pass=' + $scope.pass
+			url : app.urlWebServices + '?op=login&user=' + $scope.user + '&pass=' + $scope.pass
 		}).success(function(data) {
 			if (data.success) {
+				app.user = $scope.user;
+				app.pass = $scope.pass;
+				if ($scope.gogoratuLogin) {
+					window.localStorage.setItem('user', $scope.user);
+					window.localStorage.setItem('pass', $scope.pass);
+				}
 				$location.path('/aforo');
 			}
 			else {
@@ -29,12 +50,13 @@ app.controller('LoginController', function($scope, $http, $location) {
 			$scope.error = "Errorea zerbitzarira konektatzen.";
 		});
 	};
+	
 });
 
 /**
  * Aforo kontrola
  */
-app.controller('AforoController', function($scope) {
+app.controller('AforoController', function($scope, $http, $location) {
 	var funtzioa = 0;
 	// 0 = Sarrerak, 1 = Irteerak
 	var ikurrak = ['+', '-'];
@@ -43,22 +65,6 @@ app.controller('AforoController', function($scope) {
 
 	var sarrerak = 0;
 	var irteerak = 0;
-	
-	function sarreraBidali(kopurua) {
-		$http({
-			method : 'GET',
-			url : '../web/ws.php?op=sarrera&user=' + $scope.user + '&pass=' + $scope.pass + '&num=' + kopurua
-		}).success(function(data) {
-			if (data.success) {
-				$location.path('/aforo');
-			}
-			else {
-				$scope.error = data.error_msg;
-			}
-		}).error(function() {
-			$scope.error = "Errorea zerbitzarira konektatzen.";
-		});
-	}
 
 	/**
 	 * Kontrako funtzioa aukeratu (irteeretatik sarreretara pasa eta alderantziz).
@@ -80,7 +86,7 @@ app.controller('AforoController', function($scope) {
 	};
 
 	/**
-	 * Kopuru handia gehitu, textbox-ean adierazitakoa.
+	 * Kopuru handia gehitu, textbox-ean adierazitakoa. $scope.gehitu funtzioa erabiltzen du.
 	 */
 	$scope.gehituAsko = function() {
 		var kopurua = parseInt($scope.gehituTextbox);
@@ -94,13 +100,34 @@ app.controller('AforoController', function($scope) {
  	 * @param kopurua Gehitu behar den kopurua.
 	 */
 	$scope.gehitu = function(kopurua) {
+		var wsOp;
+		
 		if (funtzioa == 0) {
 			sarrerak += kopurua;
 			$scope.kopurua = sarrerak;
+			wsOp = "sarrera";
 		} else {
 			irteerak += kopurua;
 			$scope.kopurua = irteerak;
+			wsOp = "irteera";
 		}
+		
+		$http({
+			method : 'GET',
+			url : app.urlWebServices + '?op=' + wsOp + '&user=' + app.user + '&pass=' + app.pass + '&num=' + kopurua
+		}).success(function(data) {
+			if (data.success) {
+				$scope.bidaliGabe = "ONDO";
+			}
+			else if (data.error_code == app.loginErrorCode)
+				$location.path('/');
+			else {
+				$scope.bidaliGabe = data.error_msg;
+			}
+		}).error(function() {
+			$scope.bidaliGabe = "Errorea zerbitzarira konektatzen.";
+		});
+		
 	};
 
 	// Orrialdea kargatzerakoan sarrerak aukeratu.

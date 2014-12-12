@@ -1,7 +1,7 @@
 <form>
-	<p class="error">
+	<span class="error">
 		{{ error }}
-	</p>
+	</span>
 
 	<div class="table">
 		<div class="row">
@@ -22,5 +22,7 @@
 		</div>
 	</div>
 
+	<p><input type="checkbox" data-ng-model="gogoratuLogin" /> Gogoratu hurrengoetarako</p>
+	
 	<input type="submit" value="Sartu" data-ng-click="funtzioaLogin(user, pass)" />
 </form>
