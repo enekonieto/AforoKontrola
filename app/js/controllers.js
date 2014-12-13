@@ -56,7 +56,7 @@ app.controller('LoginController', function($scope, $http, $location) {
 /**
  * Aforo kontrola
  */
-app.controller('AforoController', function($scope, $http, $location) {
+app.controller('AforoController', function($scope, $http, $location, $timeout) {
 	var funtzioa = 0;
 	// 0 = Sarrerak, 1 = Irteerak
 	var ikurrak = ['+', '-'];
@@ -65,6 +65,7 @@ app.controller('AforoController', function($scope, $http, $location) {
 
 	var sarrerak = 0;
 	var irteerak = 0;
+	$scope.azkenSarrerak = [];
 
 	/**
 	 * Kontrako funtzioa aukeratu (irteeretatik sarreretara pasa eta alderantziz).
@@ -112,6 +113,14 @@ app.controller('AforoController', function($scope, $http, $location) {
 			wsOp = "irteera";
 		}
 		
+		// Sarrera/irteera goiko zerrenda gehitu.
+		var sarrera = {
+			testua: kopurua,
+			kopurua: kopurua
+		};
+		$scope.azkenSarrerak.push(sarrera);
+		
+		// Zerbitzarira bidali.
 		$http({
 			method : 'GET',
 			url : app.urlWebServices + '?op=' + wsOp + '&user=' + app.user + '&pass=' + app.pass + '&num=' + kopurua
@@ -132,4 +141,25 @@ app.controller('AforoController', function($scope, $http, $location) {
 
 	// Orrialdea kargatzerakoan sarrerak aukeratu.
 	funtzioaAldatu(0);
+	
+	
+	/*
+	 * Azkenetako sarrera/irteera bat luzez sakatu dela detektatzeko funtzioak.
+	 */
+	var azkenSarreraTimer = null;
+	
+	$scope.azkenSarreraMouseDown = function() {
+		azkenSarreraTimer = $timeout(azkenSarreraEzabatu, 2000);
+	};
+	
+	function azkenSarreraEzabatu() {
+		azkenSarreraTimer = null;
+	}
+	
+	$scope.azkenSarreraMouseLeave = function() {
+		if (azkenSarreraTimer != null) {
+			$timeout.cancel(azkenSarreraTimer);
+			azkenSarreraTimer = null;
+		}
+	};
 });

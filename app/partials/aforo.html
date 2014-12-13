@@ -1,9 +1,14 @@
+<select class="list" size="10" data-ng-model="aukeratutakoAzkenSarrera" data-ng-options="azkenSarrera.testua for azkenSarrera in azkenSarrerak">
+	<option  data-ng-mousedown="azkenSarreraMouseDown()" data-ng-mouseleave="azkenSarreraMouseLeave()" data-ng-mouseup="azkenSarreraMouseLeave()">1</option>
+</select>
+<p data-ng-mousedown="azkenSarreraMouseDown()" data-ng-mouseleave="azkenSarreraMouseLeave()" data-ng-mouseup="azkenSarreraMouseLeave()">froga</p>
+
 <div class="table">
 	<div class="row">
 		<div class="cell"><input type="button" value="{{ funtzioIkurra }}10" data-ng-click="gehitu(10)" /></div>
 		
 		<div class="cell"><input type="number" data-ng-model="gehituTextbox" min="1" max="99" /></div>
-		<div class="cell"><input type="button" value="{{ funtzioIkurra }}" data-ng-click="gehituAsko()" /></div>
+		<div class="cell"><input type="button" value="{{ funtzioIkurra }}{{ gehituTextbox }}" data-ng-click="gehituAsko()" /></div>
 	</div>
 	<div class="row">
 		<div class="cell"><input type="button" value="{{ funtzioIkurra }}7" data-ng-click="gehitu(7)" /></div>
@@ -21,7 +26,6 @@
 		<div class="cell"><input type="button" value="{{ funtzioIkurra }}3" data-ng-click="gehitu(3)" /></div>
 	</div>
 </div>
-
 
 <p>{{ funtzioTestua }}: {{ kopurua }} {{ bidaliGabe }}</p>
 
