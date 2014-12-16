@@ -60,12 +60,15 @@ app.controller('AforoController', function($scope, $http, $location, $timeout) {
 	var funtzioa = 0;
 	// 0 = Sarrerak, 1 = Irteerak
 	var ikurrak = ['+', '-'];
-	var testuak = ['Sarrerak', 'Irteerak'];
+	var testuak = ['SARRERAK', 'IRTEERAK'];
 	var funtzioaAldatuTestuak = ['Irteeretara aldatu', 'Sarreretara aldatu'];
 
 	var sarrerak = 0;
 	var irteerak = 0;
 	$scope.azkenSarrerak = [];
+	var bidaliGabekoak = [];
+	$scope.bidaliGabeSarrerak = 0;
+	$scope.bidaliGabeIrteerak = 0;
 
 	/**
 	 * Kontrako funtzioa aukeratu (irteeretatik sarreretara pasa eta alderantziz).
@@ -114,9 +117,15 @@ app.controller('AforoController', function($scope, $http, $location, $timeout) {
 		}
 		
 		// Sarrera/irteera goiko zerrenda gehitu.
+		var sartzeOrdua = (new Date()).toLocaleTimeString();
 		var sarrera = {
-			testua: kopurua,
-			kopurua: kopurua
+			testua: sartzeOrdua + " " + kopurua + " " + wsOp + " (bidaltzen...)",
+			ordua: sartzeOrdua,
+			mota: wsOp,
+			kopurua: kopurua,
+			bidalita: false,
+			bidaltzen: true,
+			urratua: false
 		};
 		$scope.azkenSarrerak.push(sarrera);
 		
@@ -125,16 +134,37 @@ app.controller('AforoController', function($scope, $http, $location, $timeout) {
 			method : 'GET',
 			url : app.urlWebServices + '?op=' + wsOp + '&user=' + app.user + '&pass=' + app.pass + '&num=' + kopurua
 		}).success(function(data) {
+			sarrera.bidaltzen = false;
 			if (data.success) {
-				$scope.bidaliGabe = "ONDO";
+				sarrera.bidalita = true;
+				if (sarrera.urratua)
+var a = 1;
+// BIDALI URRATZEKO
+				else
+					sarrera.testua = sartzeOrdua + " " + kopurua + " " + wsOp + " (BIDALITA)";
 			}
 			else if (data.error_code == app.loginErrorCode)
 				$location.path('/');
 			else {
-				$scope.bidaliGabe = data.error_msg;
+				if (! sarrera.urratua) {
+					sarrera.testua = sartzeOrdua + " " + kopurua + " " + wsOp + " (ERROREA: " + data.error_msg + ")";
+					bidaliGabekoak.push(sarrera);
+					if (funtzioa == 0)
+						$scope.bidaliGabeSarrerak += kopurua;
+					else
+						$scope.bidaliGabeIrteerak += kopurua;
+				}
 			}
 		}).error(function() {
-			$scope.bidaliGabe = "Errorea zerbitzarira konektatzen.";
+			sarrera.bidaltzen = false;
+			if (! sarrera.urratua) {
+				sarrera.testua = sartzeOrdua + " " + kopurua + " " + wsOp + " (ERROREA: ezin izan da konektatu)";
+				bidaliGabekoak.push(sarrera);
+				if (funtzioa == 0)
+					$scope.bidaliGabeSarrerak += kopurua;
+				else
+					$scope.bidaliGabeIrteerak += kopurua;
+			}
 		});
 		
 	};
@@ -147,13 +177,33 @@ app.controller('AforoController', function($scope, $http, $location, $timeout) {
 	 * Azkenetako sarrera/irteera bat luzez sakatu dela detektatzeko funtzioak.
 	 */
 	var azkenSarreraTimer = null;
+	var azkenSarreraIndex;
 	
-	$scope.azkenSarreraMouseDown = function() {
+	$scope.azkenSarreraMouseDown = function(index) {
+		azkenSarreraIndex = index;
 		azkenSarreraTimer = $timeout(azkenSarreraEzabatu, 2000);
 	};
 	
 	function azkenSarreraEzabatu() {
 		azkenSarreraTimer = null;
+		var aux = $scope.azkenSarrerak[azkenSarreraIndex];
+		aux.testua = "URRATUA";
+		aux.urratua = true;
+		if (! aux.bidaltzen && aux.bidalita) {
+var a = 1;
+// urratu Zerbitzaritik
+		}
+		if (aux.mota == "sarrera") {
+			if (! aux.bidaltzen && ! aux.bidalita) // Sarrerak bidalketa errorea eman du
+				$scope.bidaliGabeSarrerak -= aux.kopurua;
+			sarrerak -= aux.kopurua;
+		}
+		else {
+			if (! aux.bidaltzen && ! aux.bidalita) // Sarrerak bidalketa errorea eman du
+				$scope.bidaliGabeIrteerak -= aux.kopurua;
+			irteerak -= aux.kopurua;
+		}
+		$scope.kopurua = (funtzioa == 0) ? sarrerak : irteerak;
 	}
 	
 	$scope.azkenSarreraMouseLeave = function() {

@@ -9,13 +9,21 @@ define(ERROR_INVALID_OP, 1);
 define(ERROR_CONNECTING_DB, 2);
 define(ERROR_INVALID_USER_OR_PASS, 3);
 define(ERROR_INVALID_NUMBER, 4);
+define(ERROR_INSERTING_ROW, 5);
 
-$error = array(ERROR_NO_OP => "Ez da operaziorik aukeratu", ERROR_INVALID_OP => "Operazio izen okerra", ERROR_CONNECTING_DB => "Errorea datu basera konektatzen", ERROR_INVALID_USER_OR_PASS => "Erabiltzaile edo pasahitz okerra", ERROR_INVALID_NUMBER => "Errorea kopuruarekin", );
+$error = array(
+	ERROR_NO_OP => "Ez da operaziorik aukeratu",
+	ERROR_INVALID_OP => "Operazio izen okerra",
+	ERROR_CONNECTING_DB => "Errorea datu basera konektatzen",
+	ERROR_INVALID_USER_OR_PASS => "Erabiltzaile edo pasahitz okerra",
+	ERROR_INVALID_NUMBER => "Errorea kopuruarekin",
+	ERROR_INSERTING_ROW => "Errorea hilara sortzen"
+);
 
 if (isset($_REQUEST['op']))
 	process($_REQUEST['op']);
 else
-	response(false, ERROR_NO_OP);
+	responseError(ERROR_NO_OP);
 
 /**
  * Eskatutako operazioa aztertu eta funtzioa egokia deitu.
@@ -27,13 +35,18 @@ function process($op) {
 			loginFunc($_REQUEST['user'], $_REQUEST['pass']);
 			break;
 		case "sarrera" :
-			sarreraFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num']);
+			$gehi = (isset($_REQUEST['gehi'])) ? $_REQUEST['gehi'] : 'TRUE';
+			sarreraFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
 			break;
 		case "irteera" :
-			irteeraFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num']);
+			$gehi = (isset($_REQUEST['gehi'])) ? $_REQUEST['gehi'] : 'TRUE';
+			irteeraFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
+			break;
+		case "sarrera_urratu" :
+			sarreraUrratuFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['id']);
 			break;
 		default :
-			response(false, ERROR_INVALID_OP, " \"" . $op . "\"");
+			responseError(ERROR_INVALID_OP, " \"" . $op . "\"");
 			break;
 	}
 }
@@ -45,7 +58,7 @@ function process($op) {
  */
 function loginFunc($user, $pass) {
 	if (authentificate($user, $pass))
-		response(TRUE);
+		responseSuccess();
 }
 
 /**
@@ -53,16 +66,21 @@ function loginFunc($user, $pass) {
  * @param user Erabiltzailea
  * @param pass Pasahitza
  * @param num Sarrera kopurua
+ * @param gehi Kopurua gehitu (true) edo kendu (false)
  */
-function sarreraFunc($user, $pass, $num) {
+function sarreraFunc($user, $pass, $num, $gehi) {
 	if (authentificate($user, $pass)) {
 		if (intval($num) != 0) {
 			if ($db = openDB()) {
-				$db -> exec("INSERT INTO sarrerak (user, time, num) values( '" . $user . "', " . time() . ", " . $num . ")");
-				response(TRUE);
+				if ($db -> exec("INSERT INTO sarrerak (user, time, num, gehitu) values( '" . $user . "', " . time() . ", " . $num . ", '" . $gehi . "')")) {
+					$id = $db -> lastInsertRowid();
+					responseSuccess($id);
+				}
+				else
+					responseError(ERROR_INSERTING_ROW);
 			}
 		} else
-			response(FALSE, ERROR_INVALID_NUMBER);
+			responseError(ERROR_INVALID_NUMBER);
 	}
 }
 
@@ -71,16 +89,21 @@ function sarreraFunc($user, $pass, $num) {
  * @param user Erabiltzailea
  * @param pass Pasahitza
  * @param num Irteera kopurua
+ * @param gehi Kopurua gehitu (true) edo kendu (false)
  */
-function irteeraFunc($user, $pass, $num) {
+function irteeraFunc($user, $pass, $num, $gehi) {
 	if (authentificate($user, $pass)) {
 		if (intval($num) != 0) {
 			if ($db = openDB()) {
-				$db -> exec("INSERT INTO irteerak (user, time, num) values( '" . $user . "', " . time() . ", " . $num . ")");
-				response(TRUE);
+				if ($db -> exec("INSERT INTO irteerak (user, time, num, gehitu) values( '" . $user . "', " . time() . ", " . $num . ", '" . $gehi . "')")) {
+					$id = $db -> lastInsertRowid();
+					responseSuccess($id);
+				}
+				else
+					responseError(ERROR_INSERTING_ROW);
 			}
 		} else
-			response(FALSE, ERROR_INVALID_NUMBER);
+			responseError(ERROR_INVALID_NUMBER);
 	}
 }
 
@@ -100,7 +123,7 @@ function authentificate($user, $pass) {
 		if ($result -> fetchArray())
 			return true;
 		else
-			response(FALSE, ERROR_INVALID_USER_OR_PASS);
+			responseError(ERROR_INVALID_USER_OR_PASS);
 	}
 
 	$db -> close();
@@ -115,26 +138,36 @@ function openDB() {
 		$db = new SQLite3("aforo_kontrola.db", SQLITE3_OPEN_READWRITE);
 		return $db;
 	} catch (Exception $e) {
-		response(FALSE, ERROR_CONNECTING_DB);
+		responseError(ERROR_CONNECTING_DB);
 		return false;
 	}
 }
 
 /**
  * Erantzuna JSON moduan kodifikatu eta bidali.
- * @param success Operazioa ondo (true) atera den ala ez (false)
+ * @param id Sarrera edo irteeraren id-a (sormen operazioetan soilik).
+ */
+function responseSuccess($id = NULL) {
+	global $error;
+	$response["success"] = TRUE;
+	if ($id)
+		$response["id"] = $id;
+	echo json_encode($response);
+}
+
+/**
+ * Errorea JSON moduan kodifikatu eta bidali.
  * @param error_cod Errore zenbakia
  * @param extra_msg Errore mezuari gehitu nahi zaion testua. Errore mezuak $error array-an daude.
  */
-function response($success, $error_cod = NULL, $extra_msg = false) {
+function responseError($error_cod = NULL, $extra_msg = false) {
 	global $error;
-	$response["success"] = $success;
-	if (!$success) {
-		$response["error_code"] = $error_cod;
-		$response["error_msg"] = $error[$error_cod];
-		if ($extra_msg)
-			$response["error_msg"] .= $extra_msg;
-	}
+	$response["success"] = FALSE;
+	$response["error_code"] = $error_cod;
+	$response["error_msg"] = $error[$error_cod];
+	if ($extra_msg)
+		$response["error_msg"] .= $extra_msg;
 	echo json_encode($response);
 }
+
 ?>
