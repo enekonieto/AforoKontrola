@@ -1,0 +1,26 @@
+HATORTXU ROCK-ERAKO AFORO KONTROL APLIKAZIOA
+
+MUGIKORRA: LG Optimus L4 II
+Brand				LG
+Manufacturer		LG Electronics, Inc.
+Series				Optimus
+Compatible networks	GSM: Quad Band (850/900/1800/1900 MHz), GPRS, UMTS, HSDPA/HSUPA 7,2 Mbps, GPS
+Type				Smartphone
+Dimensions			64,7 x 112,5 x 11,9 mm
+Weight				125 g
+Operating system	Android 4.1 ( Jelly Bean)
+CPU					Mediatek 6575 1 GHz single core
+Memory				512 MB
+Storage				4 GB
+Removable storage	fino a 32 GB con microSD
+Battery				Li-Ion 1700 mAh or 2150 mAh
+Data inputs			Touch
+Display	3,8" 		320x480 pixel (151 dpi) IPS
+Rear camera			3,15 megapixel
+Connectivity		Wi-Fi 802.11 b/g/n, Bluetooth 3.0
+Dual SIM			No
+
+
+OPERADOREA: Simyo
+Sarea: Orange
+Data plana: 1GB

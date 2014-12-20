@@ -10,6 +10,7 @@ define(ERROR_CONNECTING_DB, 2);
 define(ERROR_INVALID_USER_OR_PASS, 3);
 define(ERROR_INVALID_NUMBER, 4);
 define(ERROR_INSERTING_ROW, 5);
+define(ERROR_INVALID_ID, 6);
 
 $error = array(
 	ERROR_NO_OP => "Ez da operaziorik aukeratu",
@@ -17,7 +18,8 @@ $error = array(
 	ERROR_CONNECTING_DB => "Errorea datu basera konektatzen",
 	ERROR_INVALID_USER_OR_PASS => "Erabiltzaile edo pasahitz okerra",
 	ERROR_INVALID_NUMBER => "Errorea kopuruarekin",
-	ERROR_INSERTING_ROW => "Errorea hilara sortzen"
+	ERROR_INSERTING_ROW => "Errorea hilara sortzen",
+	ERROR_INVALID_ID => "Errorea id-arekin"
 );
 
 if (isset($_REQUEST['op']))
@@ -36,14 +38,17 @@ function process($op) {
 			break;
 		case "sarrera" :
 			$gehi = (isset($_REQUEST['gehi'])) ? $_REQUEST['gehi'] : 'TRUE';
-			sarreraFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
+			gehituFunc("sarrerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
 			break;
-		case "irteera" :
+		case "irteera2" :
 			$gehi = (isset($_REQUEST['gehi'])) ? $_REQUEST['gehi'] : 'TRUE';
-			irteeraFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
+			gehituFunc("irteerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
 			break;
-		case "sarrera_urratu" :
-			sarreraUrratuFunc($_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['id']);
+		case "sarrera_urratu2" :
+			urratuFunc("sarrerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['id']);
+			break;
+		case "irteera_urratu" :
+			urratuFunc("irteerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['id']);
 			break;
 		default :
 			responseError(ERROR_INVALID_OP, " \"" . $op . "\"");
@@ -62,17 +67,18 @@ function loginFunc($user, $pass) {
 }
 
 /**
- * Sarrerak gehitu.
+ * Sarrerak edo irteerak gehitu.
+ * @param table Datu basearen tabla: sarrerak edo iteerak
  * @param user Erabiltzailea
  * @param pass Pasahitza
- * @param num Sarrera kopurua
+ * @param num Sarrera/irteera kopurua
  * @param gehi Kopurua gehitu (true) edo kendu (false)
  */
-function sarreraFunc($user, $pass, $num, $gehi) {
+function gehituFunc($table, $user, $pass, $num, $gehi) {
 	if (authentificate($user, $pass)) {
 		if (intval($num) != 0) {
 			if ($db = openDB()) {
-				if ($db -> exec("INSERT INTO sarrerak (user, time, num, gehitu) values( '" . $user . "', " . time() . ", " . $num . ", '" . $gehi . "')")) {
+				if ($db -> exec("INSERT INTO " . $table . " (user, time, num, gehitu) values( '" . $user . "', " . time() . ", " . $num . ", '" . $gehi . "')")) {
 					$id = $db -> lastInsertRowid();
 					responseSuccess($id);
 				}
@@ -85,25 +91,23 @@ function sarreraFunc($user, $pass, $num, $gehi) {
 }
 
 /**
- * Irteerak gehitu.
+ * Sarrera edo irteera lerro bat urratu.
+ * @param table Datu basearen tabla: sarrerak edo iteerak
  * @param user Erabiltzailea
  * @param pass Pasahitza
- * @param num Irteera kopurua
- * @param gehi Kopurua gehitu (true) edo kendu (false)
+ * @param id Sarrera kopurua
  */
-function irteeraFunc($user, $pass, $num, $gehi) {
+function urratuFunc($table, $user, $pass, $id) {
 	if (authentificate($user, $pass)) {
-		if (intval($num) != 0) {
+		if (intval($id) > 0) {
 			if ($db = openDB()) {
-				if ($db -> exec("INSERT INTO irteerak (user, time, num, gehitu) values( '" . $user . "', " . time() . ", " . $num . ", '" . $gehi . "')")) {
-					$id = $db -> lastInsertRowid();
-					responseSuccess($id);
-				}
+				if ($db -> exec("DELETE FROM " . $table . " WHERE id = " . $id))
+					responseSuccess();
 				else
 					responseError(ERROR_INSERTING_ROW);
 			}
 		} else
-			responseError(ERROR_INVALID_NUMBER);
+			responseError(ERROR_INVALID_ID);
 	}
 }
 

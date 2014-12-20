@@ -10,14 +10,16 @@ var app = angular.module('AforoControllers', []);
 app.urlWebServices = 'https://localhost/AforoKontrola/web/ws.php';
 app.loginErrorCode = 3;
 
+// Login datuak berreskuratu
+app.user = window.localStorage.getItem('user');
+app.pass = window.localStorage.getItem('pass');
+
 /**
  * Login
  */
 app.controller('LoginController', function($scope, $http, $location) {
-	
-	var user = window.localStorage.getItem('user');
-	var pass = window.localStorage.getItem('pass');
-	if ((user != null) && (pass != null)) {
+	// Gordetako login datuak erakutsi
+	if ((app.user != null) && (app.pass != null)) {
 		$scope.user = user;
 		$scope.pass = pass;
 		$scope.gogoratuLogin = true;
@@ -29,7 +31,6 @@ app.controller('LoginController', function($scope, $http, $location) {
 	 * @param pass Pasahitza
 	 */
 	$scope.funtzioaLogin = function(user, pass) {
-// var secret = window.localStorage.getItem('myApp.secret');
 		$http({
 			method : 'GET',
 			url : app.urlWebServices + '?op=login&user=' + $scope.user + '&pass=' + $scope.pass
@@ -40,6 +41,10 @@ app.controller('LoginController', function($scope, $http, $location) {
 				if ($scope.gogoratuLogin) {
 					window.localStorage.setItem('user', $scope.user);
 					window.localStorage.setItem('pass', $scope.pass);
+				}
+				else {
+					window.localStorage.removeItem('user');
+					window.localStorage.removeItem('pass');
 				}
 				$location.path('/aforo');
 			}
@@ -56,7 +61,7 @@ app.controller('LoginController', function($scope, $http, $location) {
 /**
  * Aforo kontrola
  */
-app.controller('AforoController', function($scope, $http, $location, $timeout) {
+app.controller('AforoController', function($scope, $http, $location, $timeout, $interval) {
 	var funtzioa = 0;
 	// 0 = Sarrerak, 1 = Irteerak
 	var ikurrak = ['+', '-'];
@@ -81,13 +86,16 @@ app.controller('AforoController', function($scope, $http, $location, $timeout) {
 	 * Sarrerak edo irteerak aukeratu.
 	 * @param funtzioBerria 0=Sarrerak 1=Irteerak
 	 */
-	funtzioaAldatu = function(funtzioBerria) {
+	function funtzioaAldatu(funtzioBerria) {
 		funtzioa = funtzioBerria;
 		$scope.funtzioIkurra = ikurrak[funtzioa];
 		$scope.funtzioTestua = testuak[funtzioa];
 		$scope.funtzioaAldatuTestua = funtzioaAldatuTestuak[funtzioa];
 		$scope.kopurua = (funtzioa == 0) ? sarrerak : irteerak;
 	};
+
+	// Orrialdea kargatzerakoan sarrerak aukeratu.
+	funtzioaAldatu(0);
 
 	/**
 	 * Kopuru handia gehitu, textbox-ean adierazitakoa. $scope.gehitu funtzioa erabiltzen du.
@@ -130,47 +138,118 @@ app.controller('AforoController', function($scope, $http, $location, $timeout) {
 		$scope.azkenSarrerak.push(sarrera);
 		
 		// Zerbitzarira bidali.
+		bidaliSarrera(sarrera);
+	};
+	
+	/**
+	 * Sarrera edo irteera zerbitzarira bidali.
+	 * @param sarrera Sarrera/irteera objetua.
+	 */
+	function bidaliSarrera(sarrera) {
 		$http({
 			method : 'GET',
-			url : app.urlWebServices + '?op=' + wsOp + '&user=' + app.user + '&pass=' + app.pass + '&num=' + kopurua
+			url : app.urlWebServices + '?op=' + sarrera.mota + '&user=' + app.user + '&pass=' + app.pass + '&num=' + sarrera.kopurua
 		}).success(function(data) {
 			sarrera.bidaltzen = false;
 			if (data.success) {
 				sarrera.bidalita = true;
+				sarrera.id = data.id;
 				if (sarrera.urratua)
-var a = 1;
-// BIDALI URRATZEKO
+					bidaliSarreraUrratzeko(sarrera);
 				else
-					sarrera.testua = sartzeOrdua + " " + kopurua + " " + wsOp + " (BIDALITA)";
+					sarrera.testua = sarrera.ordua + " " + sarrera.kopurua + " " + sarrera.mota + " (BIDALITA)";
 			}
 			else if (data.error_code == app.loginErrorCode)
 				$location.path('/');
 			else {
 				if (! sarrera.urratua) {
-					sarrera.testua = sartzeOrdua + " " + kopurua + " " + wsOp + " (ERROREA: " + data.error_msg + ")";
+					sarrera.testua = sarrera.ordua + " " + sarrera.kopurua + " " + sarrera.mota + " (ERROREA: " + data.error_msg + ")";
 					bidaliGabekoak.push(sarrera);
 					if (funtzioa == 0)
-						$scope.bidaliGabeSarrerak += kopurua;
+						$scope.bidaliGabeSarrerak += sarrera.kopurua;
 					else
-						$scope.bidaliGabeIrteerak += kopurua;
+						$scope.bidaliGabeIrteerak += sarrera.kopurua;
 				}
 			}
 		}).error(function() {
 			sarrera.bidaltzen = false;
 			if (! sarrera.urratua) {
-				sarrera.testua = sartzeOrdua + " " + kopurua + " " + wsOp + " (ERROREA: ezin izan da konektatu)";
+				sarrera.testua = sarrera.ordua + " " + sarrera.kopurua + " " + sarrera.mota + " (ERROREA: ezin izan da konektatu)";
 				bidaliGabekoak.push(sarrera);
 				if (funtzioa == 0)
-					$scope.bidaliGabeSarrerak += kopurua;
+					$scope.bidaliGabeSarrerak += sarrera.kopurua;
 				else
-					$scope.bidaliGabeIrteerak += kopurua;
+					$scope.bidaliGabeIrteerak += sarrera.kopurua;
 			}
 		});
+	}
+	
+	/**
+	 * Sarrera edo irteera urratzeko zerbitzarira bidali.
+	 * @param sarrera Sarrera/irteera objetua.
+	 */
+	function bidaliSarreraUrratzeko(sarrera) {
+		sarrera.bidalita = false;
+		sarrera.bidaltzen = true;
+		$http({
+			method : 'GET',
+			url : app.urlWebServices + '?op=' + sarrera.mota + '_urratu' + '&user=' + app.user + '&pass=' + app.pass + '&id=' + sarrera.id
+		}).success(function(data) {
+			sarrera.bidaltzen = false;
+			if (data.success) {
+				sarrera.bidalita = true;
+				sarrera.testua = "URRATUA";
+			}
+			else if (data.error_code == app.loginErrorCode)
+				$location.path('/');
+			else
+				bidaliGabekoak.push(sarrera);
+		}).error(function() {
+			sarrera.bidaltzen = false;
+			bidaliGabekoak.push(sarrera);
+		});
+	}
+	
+	/**
+	 * Errore batengatik bidali gabe geratu diren operazioak birbidali.
+	 */
+	function bidaliGabekoakBirbidali() {
+		var bidaliGabekoakZahar = bidaliGabekoak;
+		bidaliGabekoak = [];
+console.log("BIRBIDALTZEN");
+console.log("bidaliGabekoakZahar:" + bidaliGabekoakZahar);
 		
-	};
-
-	// Orrialdea kargatzerakoan sarrerak aukeratu.
-	funtzioaAldatu(0);
+		for (var i = 0; i < bidaliGabekoakZahar.length; i++) {
+			var aux = bidaliGabekoakZahar[i];
+console.log("sarrera:" + aux.kopurua + " bidaltzen=" + aux.bidaltzen + " bidalita=" + aux.bidalita);
+			if (! aux.bidaltzen && ! aux.bidalita) {
+				aux.bidaltzen = true;
+				var url = app.urlWebServices + '?op=' + aux.mota + ((aux.urratua) ? '_urratu' : '')
+					+ '&user=' + app.user + '&pass=' + app.pass
+					+ ((aux.urratua) ? '&id=' + aux.id : '&num=' + aux.kopurua)
+				$http({
+					method : 'GET',
+					url : url
+				}).success(function(data) {
+					aux.bidaltzen = false;
+					if (data.success) {
+						aux.bidalita = true;
+						if (aux.urratua)
+							aux.testua = "URRATUA";
+						else
+							aux.testua = aux.ordua + " " + aux.kopurua + " " + aux.mota + " (BIDALITA)";
+					}
+					else
+						bidaliGabekoak.push(aux);
+				}).error(function() {
+					aux.bidaltzen = false;
+					bidaliGabekoak.push(aux);
+				});
+			}
+		}
+	}
+	// Minuturo saiatu bidali gabekoak birbidaltzen.
+	$interval(bidaliGabekoakBirbidali, 15000);
 	
 	
 	/*
@@ -187,18 +266,16 @@ var a = 1;
 	function azkenSarreraEzabatu() {
 		azkenSarreraTimer = null;
 		var aux = $scope.azkenSarrerak[azkenSarreraIndex];
-		aux.testua = "URRATUA";
+		aux.testua = "Urratzen...";
 		aux.urratua = true;
-		if (! aux.bidaltzen && aux.bidalita) {
-var a = 1;
-// urratu Zerbitzaritik
-		}
+		if (! aux.bidaltzen && aux.bidalita)
+			bidaliSarreraUrratzeko(aux);
 		if (aux.mota == "sarrera") {
 			if (! aux.bidaltzen && ! aux.bidalita) // Sarrerak bidalketa errorea eman du
 				$scope.bidaliGabeSarrerak -= aux.kopurua;
 			sarrerak -= aux.kopurua;
 		}
-		else {
+		else if (aux.mota == "irteera") {
 			if (! aux.bidaltzen && ! aux.bidalita) // Sarrerak bidalketa errorea eman du
 				$scope.bidaliGabeIrteerak -= aux.kopurua;
 			irteerak -= aux.kopurua;
