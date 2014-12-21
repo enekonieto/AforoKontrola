@@ -2,31 +2,60 @@
 	text-align: center;
 }
 
+h1 {
+	font-size: medium;
+}
+
 .error {
 	font-size: small;
 	color: #FF0000;
 }
 
-.list {
-	width: 80%;
+#list {
+	width: 90%;
+	height: 100px;
+	line-height: 40px;
+	overflow-y: scroll;
+	margin-left: auto;
+	margin-right: auto;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #DDDDDD;
+	user-select: none;
+}
+
+#list div {
+	-moz-user-select: none;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+#list div:nth-child(odd) {
+	background-color: #AAAAAA;
+}
+
+.list div:nth-child(even) {
+	background-color: #DDDDDD;
 }
 
 .table {
 	display: table;
-	width: 80%;
+	width: 90%;
 	margin-left: auto;
 	margin-right: auto;
 }
+
 .row {
 	display: table-row;
 }
+
 .cell {
 	display: table-cell;
 	width: 33%;
-	padding: 20px;
+	padding: 10px;
 }
 
 .cell input {
-	width: 100px;
-	height: 40px;
+	width: 60px;
+	height: 30px;
 }

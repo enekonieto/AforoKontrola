@@ -2,13 +2,14 @@
  * Orrialdeen javascript funtzioak. AngularJS controller-ak hemen daude.
  */
 
-var app = angular.module('AforoControllers', []);
+var app = angular.module('AforoControllers', [ 'ngAnimate' ]);
 
 /**
  * Konstanteak
  */
-app.urlWebServices = 'https://localhost/AforoKontrola/web/ws.php';
+app.urlWebServices = 'https://192.168.42.221/AforoKontrola/web/ws.php';
 app.loginErrorCode = 3;
+app.resendInterval = 15000; // In milliseconds
 
 // Login datuak berreskuratu
 app.user = window.localStorage.getItem('user');
@@ -20,8 +21,8 @@ app.pass = window.localStorage.getItem('pass');
 app.controller('LoginController', function($scope, $http, $location) {
 	// Gordetako login datuak erakutsi
 	if ((app.user != null) && (app.pass != null)) {
-		$scope.user = user;
-		$scope.pass = pass;
+		$scope.user = app.user;
+		$scope.pass = app.pass;
 		$scope.gogoratuLogin = true;
 	}
 	
@@ -59,9 +60,20 @@ app.controller('LoginController', function($scope, $http, $location) {
 });
 
 /**
+ * Zerrendaren scrollbar-a behean mantentzeko direktiba.
+ */
+app.directive('scrollbardown', function () {
+    return function (scope, element, attrs) {
+        scope.$watch("azkenSarrerak", function (value) {
+        	scope.divScroll.activeScroll();
+        });
+    };
+});
+
+/**
  * Aforo kontrola
  */
-app.controller('AforoController', function($scope, $http, $location, $timeout, $interval) {
+app.controller('AforoController', function($scope, $http, $location, $timeout, $interval, $animate) {
 	var funtzioa = 0;
 	// 0 = Sarrerak, 1 = Irteerak
 	var ikurrak = ['+', '-'];
@@ -74,6 +86,10 @@ app.controller('AforoController', function($scope, $http, $location, $timeout, $
 	var bidaliGabekoak = [];
 	$scope.bidaliGabeSarrerak = 0;
 	$scope.bidaliGabeIrteerak = 0;
+	
+	// Zerrendako azkeneko lerroak ikustea.
+	$scope.divScroll = new chatscroll.Pane('list');
+
 
 	/**
 	 * Kontrako funtzioa aukeratu (irteeretatik sarreretara pasa eta alderantziz).
@@ -249,7 +265,7 @@ console.log("sarrera:" + aux.kopurua + " bidaltzen=" + aux.bidaltzen + " bidalit
 		}
 	}
 	// Minuturo saiatu bidali gabekoak birbidaltzen.
-	$interval(bidaliGabekoakBirbidali, 15000);
+	$interval(bidaliGabekoakBirbidali, app.resendInterval);
 	
 	
 	/*
