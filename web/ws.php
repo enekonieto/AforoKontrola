@@ -11,6 +11,7 @@ define(ERROR_INVALID_USER_OR_PASS, 3);
 define(ERROR_INVALID_NUMBER, 4);
 define(ERROR_INSERTING_ROW, 5);
 define(ERROR_INVALID_ID, 6);
+define(ERROR_QUERYING, 7);
 
 $error = array(
 	ERROR_NO_OP => "Ez da operaziorik aukeratu",
@@ -19,7 +20,8 @@ $error = array(
 	ERROR_INVALID_USER_OR_PASS => "Erabiltzaile edo pasahitz okerra",
 	ERROR_INVALID_NUMBER => "Errorea kopuruarekin",
 	ERROR_INSERTING_ROW => "Errorea hilara sortzen",
-	ERROR_INVALID_ID => "Errorea id-arekin"
+	ERROR_INVALID_ID => "Errorea id-arekin",
+	ERROR_QUERYING => "Errorea kontsultan"
 );
 
 if (isset($_REQUEST['op']))
@@ -40,11 +42,11 @@ function process($op) {
 			$gehi = (isset($_REQUEST['gehi'])) ? $_REQUEST['gehi'] : 'TRUE';
 			gehituFunc("sarrerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
 			break;
-		case "irteera2" :
+		case "irteera" :
 			$gehi = (isset($_REQUEST['gehi'])) ? $_REQUEST['gehi'] : 'TRUE';
 			gehituFunc("irteerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['num'], $gehi);
 			break;
-		case "sarrera_urratu2" :
+		case "sarrera_urratu" :
 			urratuFunc("sarrerak", $_REQUEST['user'], $_REQUEST['pass'], $_REQUEST['id']);
 			break;
 		case "irteera_urratu" :
@@ -124,10 +126,14 @@ function urratuFunc($table, $user, $pass, $id) {
 function authentificate($user, $pass) {
 	if ($db = openDB()) {
 		$result = $db -> query("SELECT * from users where user = '" . $user . "' and pass='" . $pass . "'");
-		if ($result -> fetchArray())
-			return true;
+		if ($result) {
+			if ($result -> fetchArray())
+				return true;
+			else
+				responseError(ERROR_INVALID_USER_OR_PASS);
+		}
 		else
-			responseError(ERROR_INVALID_USER_OR_PASS);
+			responseError(ERROR_QUERYING);
 	}
 
 	$db -> close();

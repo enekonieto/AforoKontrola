@@ -7,9 +7,9 @@ var app = angular.module('AforoControllers', [ 'ngAnimate' ]);
 /**
  * Konstanteak
  */
-app.urlWebServices = 'https://192.168.42.221/AforoKontrola/web/ws.php';
+app.urlWebServices = 'https://192.168.42.23/AforoKontrola/web/ws.php';
 app.loginErrorCode = 3;
-app.resendInterval = 15000; // In milliseconds
+app.resendInterval = 5000; // In milliseconds
 
 // Login datuak berreskuratu
 app.user = window.localStorage.getItem('user');
@@ -227,44 +227,70 @@ app.controller('AforoController', function($scope, $http, $location, $timeout, $
 	}
 	
 	/**
-	 * Errore batengatik bidali gabe geratu diren operazioak birbidali.
+	 * Birbidalketaren arrakasta callback funtzioa sortu.
+	 * @param i Sarreraren posizioa bidaliGabekoak array-an.
 	 */
-	function bidaliGabekoakBirbidali() {
-		var bidaliGabekoakZahar = bidaliGabekoak;
-		bidaliGabekoak = [];
-console.log("BIRBIDALTZEN");
-console.log("bidaliGabekoakZahar:" + bidaliGabekoakZahar);
-		
-		for (var i = 0; i < bidaliGabekoakZahar.length; i++) {
-			var aux = bidaliGabekoakZahar[i];
-console.log("sarrera:" + aux.kopurua + " bidaltzen=" + aux.bidaltzen + " bidalita=" + aux.bidalita);
-			if (! aux.bidaltzen && ! aux.bidalita) {
-				aux.bidaltzen = true;
-				var url = app.urlWebServices + '?op=' + aux.mota + ((aux.urratua) ? '_urratu' : '')
-					+ '&user=' + app.user + '&pass=' + app.pass
-					+ ((aux.urratua) ? '&id=' + aux.id : '&num=' + aux.kopurua)
-				$http({
-					method : 'GET',
-					url : url
-				}).success(function(data) {
-					aux.bidaltzen = false;
-					if (data.success) {
-						aux.bidalita = true;
-						if (aux.urratua)
-							aux.testua = "URRATUA";
-						else
-							aux.testua = aux.ordua + " " + aux.kopurua + " " + aux.mota + " (BIDALITA)";
-					}
-					else
-						bidaliGabekoak.push(aux);
-				}).error(function() {
-					aux.bidaltzen = false;
-					bidaliGabekoak.push(aux);
-				});
+	function successCallbackCreator(i) {
+		return function(data) {
+console.log("SUCCESS " + i + " " + data.success);
+			var aux = bidaliGabekoak[i];
+			aux.bidaltzen = false;
+			if (data.success) {
+				aux.bidalita = true;
+				bidaliGabekoak.splice(i, 1);
+				if (aux.urratua) {
+					aux.testua = "URRATUA";
+				}
+				else {
+					aux.testua = aux.ordua + " " + aux.kopurua + " " + aux.mota + " (BIDALITA)";
+					if (aux.mota = "sarrera")
+						$scope.bidaliGabeSarrerak -= aux.kopurua;
+					else if (aux.mota = "irteera")
+						$scope.bidaliGabeIrteerak -= aux.kopurua;
+				}
 			}
 		}
 	}
+	
+	/**
+	 * Birbidalketaren errore callback funtzioa sortu.
+	 * @param i Sarreraren posizioa bidaliGabekoak array-an.
+	 */
+	function errorCallbackCreator(i) {
+		return function() {
+console.log("ERROR " + i);
+			bidaliGabekoak[i].bidaltzen = false;
+		  }
+	}
+	
+	/**
+	 * Errore batengatik bidali gabe geratu diren operazioak birbidali.
+	 */
+	function bidaliGabekoakBirbidali() {
+		if (i >= bidaliGabekoak.length)
+			i = 0;
+		if (bidaliGabekoak.length > 0) {
+			var aux = bidaliGabekoak[i];
+			if (! aux.bidaltzen) {
+				if (aux.bidalita) {
+					aux.testua = "URRATUA";
+					bidaliGabekoak.splice(i, 1);
+				}
+				else {
+					aux.bidaltzen = true;
+					var url = app.urlWebServices + '?op=' + aux.mota + ((aux.urratua) ? '_urratu' : '')
+						+ '&user=' + app.user + '&pass=' + app.pass
+						+ ((aux.urratua) ? '&id=' + aux.id : '&num=' + aux.kopurua)
+					$http({ method : 'GET', url : url })
+						.success(successCallbackCreator(i))
+						.error(errorCallbackCreator(i));
+				}
+			}
+			i = (i + 1) % bidaliGabekoak.length;
+		}
+	}
 	// Minuturo saiatu bidali gabekoak birbidaltzen.
+	var i = 0;
 	$interval(bidaliGabekoakBirbidali, app.resendInterval);
 	
 	
@@ -287,13 +313,19 @@ console.log("sarrera:" + aux.kopurua + " bidaltzen=" + aux.bidaltzen + " bidalit
 		if (! aux.bidaltzen && aux.bidalita)
 			bidaliSarreraUrratzeko(aux);
 		if (aux.mota == "sarrera") {
-			if (! aux.bidaltzen && ! aux.bidalita) // Sarrerak bidalketa errorea eman du
+			if (! aux.bidaltzen && ! aux.bidalita) {
+				// Sarrerak bidalketa errorea eman du
 				$scope.bidaliGabeSarrerak -= aux.kopurua;
+				aux.bidalita = true;
+			} 
 			sarrerak -= aux.kopurua;
 		}
 		else if (aux.mota == "irteera") {
-			if (! aux.bidaltzen && ! aux.bidalita) // Sarrerak bidalketa errorea eman du
+			if (! aux.bidaltzen && ! aux.bidalita) {
+				// Irteerak bidalketa errorea eman du
 				$scope.bidaliGabeIrteerak -= aux.kopurua;
+				aux.bidalita = true;
+			} 
 			irteerak -= aux.kopurua;
 		}
 		$scope.kopurua = (funtzioa == 0) ? sarrerak : irteerak;
