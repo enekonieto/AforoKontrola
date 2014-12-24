@@ -1,4 +1,7 @@
 EGITEKE
 
 sarrera/irteerak loginean
-routerra eta zerbitzaria
+
+1000 sarrera/irteera sartu ahal izatea
+sarrera/irteera guztiak ikusi ahal izatea
+azkeneko sarrerak urratu ahal izatea

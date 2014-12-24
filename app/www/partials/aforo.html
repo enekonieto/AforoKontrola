@@ -1,7 +1,7 @@
 <h1>{{ funtzioTestua }}</h1>
 
 <div id="list">
-	<div scrollbardown ng-repeat="azkenSarrera in azkenSarrerak" data-ng-mousedown="azkenSarreraMouseDown($index)" data-ng-mouseleave="azkenSarreraMouseLeave()" data-ng-mouseup="azkenSarreraMouseLeave()">{{ azkenSarrera.testua }}</div>
+	<div scrollbardown ng-repeat="azkenSarrera in azkenSarrerak" data-ng-mousedown="azkenSarreraMouseDown($index)" data-ng-mouseleave="azkenSarreraMouseLeave()" data-ng-mouseup="azkenSarreraMouseLeave()" class="{{ azkenSarrera.cssClass }}">{{ azkenSarrera.testua }}</div>
 </div>
 
 <div class="table">
@@ -29,6 +29,6 @@
 </div>
 
 <span>{{ funtzioTestua }}: {{ kopurua }}<br>
-BIDALI GABE: sarrerak={{ bidaliGabeSarrerak }} irteerak={{ bidaliGabeIrteerak }}</span>
+BIDALI GABE: sarrerak={{ bidaliGabeSarrerak }} irteerak={{ bidaliGabeIrteerak }}</span><br>
 
 <input type="button" value="{{ funtzioaAldatuTestua }}" data-ng-click="funtzioaAldatu()" />
