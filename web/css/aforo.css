@@ -1,0 +1,15 @@
+h1 {
+	text-align: center;
+	margin-top: 40px;
+	margin-bottom: 160px;
+}
+
+.data {
+	text-align: center;
+	margin-left: auto;
+	margin-right: auto;
+	padding: 20px;
+	width: 50%;
+	border-style: solid;
+	border-width: thin;
+}

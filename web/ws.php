@@ -145,7 +145,7 @@ function authentificate($user, $pass) {
  */
 function openDB() {
 	try {
-		$db = new SQLite3("aforo_kontrola.db", SQLITE3_OPEN_READWRITE);
+		$db = new SQLite3("../aforo_kontrola.db", SQLITE3_OPEN_READWRITE);
 		return $db;
 	} catch (Exception $e) {
 		responseError(ERROR_CONNECTING_DB);
