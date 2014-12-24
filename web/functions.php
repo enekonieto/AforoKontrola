@@ -9,15 +9,29 @@ define(ERROR_INSERTING_ROW, 5);
 define(ERROR_INVALID_ID, 6);
 define(ERROR_QUERYING, 7);
 
+$error = array(
+	ERROR_NO_OP => "Ez da operaziorik aukeratu",
+	ERROR_INVALID_OP => "Operazio izen okerra",
+	ERROR_CONNECTING_DB => "Errorea datu basera konektatzen",
+	ERROR_INVALID_USER_OR_PASS => "Erabiltzaile edo pasahitz okerra",
+	ERROR_INVALID_NUMBER => "Errorea kopuruarekin",
+	ERROR_INSERTING_ROW => "Errorea hilara sortzen",
+	ERROR_INVALID_ID => "Errorea id-arekin",
+	ERROR_QUERYING => "Errorea kontsultan"
+);
+
 /**
  * Sarrera eta irteera kopuru totala lortu.
  * @return Sarrera eta irteera kopurua.
  */
 function lortuSarrerakEtaIrteerakGuztira() {
 	if ($db = openDB()) {
-		$result = $db -> query("SELECT (SELECT SUM(num) FROM sarrerak WHERE deleted = 'FALSE'), (SELECT SUM(num) FROM irteerak WHERE deleted = 'FALSE')");
-		if ($result)
-			return $result -> fetchArray();
+		$query = "SELECT (SELECT SUM(num) FROM sarrerak WHERE gehitu = 'TRUE' AND deleted = 'FALSE'),(SELECT SUM(num) FROM sarrerak WHERE gehitu = 'FALSE' AND deleted = 'FALSE'),(SELECT SUM(num) FROM irteerak WHERE gehitu = 'TRUE' AND deleted = 'FALSE'),(SELECT SUM(num) FROM irteerak WHERE gehitu = 'FALSE' AND deleted = 'FALSE')";
+		$result = $db -> query($query);
+		if ($result) {
+			$row = $result -> fetchArray();
+			return array($row[0] - $row[1], $row[2] - $row[3]);
+		}
 		else
 			showError(ERROR_QUERYING);
 		$db -> close();
@@ -80,7 +94,7 @@ function lortuAforoProgresioa() {
 				if ($azkenSarrera['gehitu'] == 'TRUE')
 					$guztira += $azkenSarrera['num'];
 				else
-					$guztira -= $azkenIrteera['num'];
+					$guztira -= $azkenSarrera['num'];
 				$progresioa[] = array($azkenSarrera[time] - $hasiera, $guztira);
 				$sarreraGehio = ($azkenSarrera = $sarrerak -> fetchArray());
 			}
@@ -162,7 +176,8 @@ function openDB() {
  * @param extra_msg Errore mezuari gehitu nahi zaion testua. Errore mezuak $error array-an daude.
  */
 function showError($error_cod = NULL, $extra_msg = false) {
-	echo "<p>ERROR </p>" . $error_cod;
+	global $error;
+	echo "<p>ERROREA: " . $error[$error_cod] . "</p>";
 }
 
 ?>

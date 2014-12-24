@@ -58,6 +58,8 @@ if ($db = openDB()) {
 	
 	$db -> close();
 }
+else
+	showError(ERROR_CONNECTING_DB);
 
 ?>
 		</div>
