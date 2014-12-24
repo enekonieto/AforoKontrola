@@ -7,7 +7,7 @@ var app = angular.module('AforoControllers', [ 'ngAnimate' ]);
 /**
  * Konstanteak
  */
-app.urlWebServices = 'https://localhost/AforoKontrola/web/ws.php';
+app.urlWebServices = 'https://192.168.1.254/AforoKontrola/web/ws.php';
 app.loginErrorCode = 3;
 app.resendInterval = 5000; // In milliseconds
 

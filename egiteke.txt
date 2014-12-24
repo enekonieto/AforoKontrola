@@ -1,9 +1,4 @@
 EGITEKE
 
 sarrera/irteerak loginean
-3G eta wifi bidez ibiltzea
-webgunea
-usb hotspot
-trafiko eta 2G frogak
 routerra eta zerbitzaria
-usb tether
