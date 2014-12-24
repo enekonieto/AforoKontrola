@@ -11,7 +11,7 @@ tryLogin();
 	content="text/html; charset=utf-8" />
 
 <title>Aforo Kontrola</title>
-<meta http-equiv="refresh" content="100">
+<meta http-equiv="refresh" content="10">
 
 <link href="css/aforo.css" rel="stylesheet" type="text/css" />
 <script language="javascript">
