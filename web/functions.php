@@ -125,7 +125,7 @@ function tryLogin() {
  */
 function authentificate($user, $pass) {
 	if ($db = openDB()) {
-		$result = $db -> query("SELECT * from users where user = '" . $user . "' and pass='" . $pass . "' and admin = 'true'");
+		$result = $db -> query("SELECT * from users where user = '" . $user . "' and pass='" . sha1($pass) . "' and admin = 'true'");
 		if ($result) {
 			if ($result -> fetchArray())
 				return true;

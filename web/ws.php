@@ -125,7 +125,7 @@ function urratuFunc($table, $user, $pass, $id) {
  */
 function authentificate($user, $pass) {
 	if ($db = openDB()) {
-		$result = $db -> query("SELECT * from users where user = '" . $user . "' and pass='" . $pass . "'");
+		$result = $db -> query("SELECT * from users where user = '" . $user . "' and pass='" . sha1($pass) . "'");
 		if ($result) {
 			if ($result -> fetchArray())
 				return true;
