@@ -21,7 +21,6 @@ tryLogin();
 </head>
 
 <body>
-	<h1>Aforo Kontrola</h1>
 	<div class="data">
 		<div id="container">
 		</div>
