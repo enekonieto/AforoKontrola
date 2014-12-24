@@ -7,7 +7,7 @@ var app = angular.module('AforoControllers', [ 'ngAnimate' ]);
 /**
  * Konstanteak
  */
-app.urlWebServices = 'https://192.168.1.254/ws.php';
+app.urlWebServices = 'http://192.168.1.254/web/ws.php';
 app.loginErrorCode = 3;
 app.resendInterval = 5000; // In milliseconds
 
@@ -201,7 +201,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 							sarrera.testua = sarrera.ordua + " "
 									+ sarrera.kopurua + " " + sarrera.mota
 									+ " (ERROREA: " + data.error_msg + ")";
-							cssClass : "sarreraErrorea";
+							sarrera.cssClass = "sarreraErrorea";
 							bidaliGabekoak.push(sarrera);
 							if (funtzioa == 0)
 								$scope.bidaliGabeSarrerak += sarrera.kopurua;
@@ -216,7 +216,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 						sarrera.testua = sarrera.ordua + " " + sarrera.kopurua
 								+ " " + sarrera.mota
 								+ " (ERROREA: ezin izan da konektatu)";
-						cssClass : "sarreraErrorea";
+						sarrera.cssClass =  "sarreraErrorea";
 						bidaliGabekoak.push(sarrera);
 						if (funtzioa == 0)
 							$scope.bidaliGabeSarrerak += sarrera.kopurua;
@@ -252,7 +252,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 				bidaliGabekoak.push(sarrera);
 		}).error(function() {
 			sarrera.bidaltzen = false;
-			cssClass : "sarreraErrorea";
+			sarrera.cssClass =  "sarreraErrorea";
 			bidaliGabekoak.push(sarrera);
 		});
 	}
@@ -275,7 +275,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 				} else {
 					aux.testua = aux.ordua + " " + aux.kopurua + " " + aux.mota
 							+ " (BIDALITA)";
-					cssClass : "sarreraOndo";
+					aux.cssClass =  "sarreraOndo";
 					if (aux.mota = "sarrera")
 						$scope.bidaliGabeSarrerak -= aux.kopurua;
 					else if (aux.mota = "irteera")
@@ -308,7 +308,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 			if (!aux.bidaltzen) {
 				if (aux.bidalita) {
 					aux.testua = "URRATUA";
-					cssClass : "sarreraOndo";
+					aux.cssClass =  "sarreraOndo";
 					bidaliGabekoak.splice(i, 1);
 				} else {
 					aux.bidaltzen = true;

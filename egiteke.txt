@@ -3,5 +3,4 @@ EGITEKE
 sarrera/irteerak loginean
 
 1000 sarrera/irteera sartu ahal izatea
-sarrera/irteera guztiak ikusi ahal izatea
 azkeneko sarrerak urratu ahal izatea

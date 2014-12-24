@@ -13,16 +13,16 @@ define(ERROR_QUERYING, 7);
  * Sarrera eta irteera kopuru totala lortu.
  * @return Sarrera eta irteera kopurua.
  */
-function lortuSarrerakEtaIrteerak() {
+function lortuSarrerakEtaIrteerakGuztira() {
 	if ($db = openDB()) {
 		$result = $db -> query("SELECT (SELECT SUM(num) FROM sarrerak WHERE deleted = 'FALSE'), (SELECT SUM(num) FROM irteerak WHERE deleted = 'FALSE')");
 		if ($result)
 			return $result -> fetchArray();
 		else
 			showError(ERROR_QUERYING);
+		$db -> close();
 	}
 
-	$db -> close();
 	return false;
 }
 
@@ -46,6 +46,7 @@ function lortuProgresioa($taula) {
 				$guztira -= $row['num'];
 			$progresioa[] = array($row['time'] - $hasiera, $guztira);
 		}
+		$db -> close();
 	}
 	
 	return json_encode(array($hasiera, $progresioa));
@@ -92,6 +93,7 @@ function lortuAforoProgresioa() {
 				$irteeraGehio = ($azkenIrteera = $irteerak -> fetchArray());
 			}
 		}
+		$db -> close();
 	}
 	
 	return json_encode(array($hasiera, $progresioa));
@@ -134,9 +136,10 @@ function authentificate($user, $pass) {
 		}
 		else
 			showError(ERROR_QUERYING);
+		
+		$db -> close();
 	}
 
-	$db -> close();
 	return false;
 }
 

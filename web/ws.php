@@ -86,6 +86,7 @@ function gehituFunc($table, $user, $pass, $num, $gehi) {
 				}
 				else
 					responseError(ERROR_INSERTING_ROW);
+				$db -> close();
 			}
 		} else
 			responseError(ERROR_INVALID_NUMBER);
@@ -107,6 +108,7 @@ function urratuFunc($table, $user, $pass, $id) {
 					responseSuccess();
 				else
 					responseError(ERROR_INSERTING_ROW);
+				$db -> close();
 			}
 		} else
 			responseError(ERROR_INVALID_ID);
@@ -134,9 +136,10 @@ function authentificate($user, $pass) {
 		}
 		else
 			responseError(ERROR_QUERYING);
+		
+		$db -> close();
 	}
 
-	$db -> close();
 	return false;
 }
 

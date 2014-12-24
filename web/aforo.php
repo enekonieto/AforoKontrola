@@ -19,13 +19,13 @@ tryLogin();
 		<h1>Aforo Kontrola</h1>
 		<div class="data">
 <?php
-	$datuak = lortuSarrerakEtaIrteerak();
+	$datuak = lortuSarrerakEtaIrteerakGuztira();
 	$sarrerak = $datuak[0];
 	$irteerak = $datuak[1];
 	echo("<p>Sarrerak: $sarrerak</p>");
 	echo("<p>Irteerak: $irteerak</p>");
 	echo("<h3>BARRUAN: " . ($sarrerak - $irteerak) . " pertsona</h3>");
-	echo ("<p><a href=\"stats.php\">Grafika ikusi</a></p>");
+	echo ("<p><a href=\"sarrerak.php\">Sarrerak</a> | <a href=\"irteerak.php\">Irteerak</a> | <a href=\"stats.php\">Grafika</a></p>");
 ?>
 		</div>
 	</body>
