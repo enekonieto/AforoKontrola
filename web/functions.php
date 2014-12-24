@@ -102,15 +102,15 @@ function lortuAforoProgresioa() {
  */
 function tryLogin() {
 	session_start();
-	if (isset($_SESSION["user"]) && isset($_SESSION["pass"])) {
-		$user = $_SESSION["user"];
-		$pass = $_SESSION["pass"];
-	}
-	else {
+	if (isset($_REQUEST["user"]) && isset($_REQUEST["pass"])) {
 		$user = $_REQUEST["user"];
 		$_SESSION["user"] = $user;
 		$pass = $_REQUEST["pass"];
 		$_SESSION["pass"] = $pass;
+	}
+	else if (isset($_SESSION["user"]) && isset($_SESSION["pass"])) {
+		$user = $_SESSION["user"];
+		$pass = $_SESSION["pass"];
 	}
 	
 	if (! authentificate($user, $pass))
