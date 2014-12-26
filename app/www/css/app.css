@@ -26,6 +26,7 @@ h1 {
 }
 
 #list {
+	text-align: left;
 	width: 90%;
 	height: 150px;
 	overflow-y: scroll;

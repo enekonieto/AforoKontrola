@@ -278,7 +278,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 					aux.testua = aux.ordua + " " + aux.kopurua + " " + aux.mota
 							+ " (BIDALITA)";
 					aux.cssClass = "sarreraOndo";
-					if (aux.mota = "sarrera")
+					if (aux.mota == "sarrera")
 						$scope.bidaliGabeSarrerak -= aux.kopurua;
 					else if (aux.mota = "irteera")
 						$scope.bidaliGabeIrteerak -= aux.kopurua;
