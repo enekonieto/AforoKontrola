@@ -171,7 +171,7 @@ function openDB() {
 }
 
 /**
- * Errorea JSON moduan kodifikatu eta bidali.
+ * Errorea erakutsi.
  * @param error_cod Errore zenbakia
  * @param extra_msg Errore mezuari gehitu nahi zaion testua. Errore mezuak $error array-an daude.
  */

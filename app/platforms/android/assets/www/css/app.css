@@ -6,6 +6,10 @@ h1 {
 	font-size: medium;
 }
 
+.aldatu {
+	float: right;
+}
+
 .error {
 	font-size: small;
 	color: #FF0000;
@@ -22,7 +26,6 @@ h1 {
 #list {
 	width: 90%;
 	height: 100px;
-	line-height: 40px;
 	overflow-y: scroll;
 	margin-left: auto;
 	margin-right: auto;
@@ -36,6 +39,8 @@ h1 {
 	-moz-user-select: none;
 	-webkit-user-select: none;
 	user-select: none;
+	font-size: small;
+	padding: 2px;
 }
 
 #list div:nth-child(odd) {
@@ -74,5 +79,4 @@ h1 {
 .cell input {
 	width: 75px;
 	height: 40px;
-	vertical-align: top;
 }

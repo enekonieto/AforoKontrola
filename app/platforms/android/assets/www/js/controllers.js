@@ -7,7 +7,7 @@ var app = angular.module('AforoControllers', [ 'ngAnimate' ]);
 /**
  * Konstanteak
  */
-app.urlWebServices = 'http://192.168.1.254/web/ws.php';
+app.urlWebServices = 'https://192.168.1.254/ws.php';
 app.loginErrorCode = 3;
 app.resendInterval = 5000; // In milliseconds
 
@@ -82,7 +82,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 	// 0 = Sarrerak, 1 = Irteerak
 	var ikurrak = [ '+', '-' ];
 	var testuak = [ 'SARRERAK', 'IRTEERAK' ];
-	var funtzioaAldatuTestuak = [ 'Irteeretara aldatu', 'Sarreretara aldatu' ];
+	var funtzioaAldatuTestuak = [ 'Irteerak', 'Sarrerak' ];
 
 	var sarrerak = 0;
 	var irteerak = 0;
@@ -99,7 +99,9 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 	 * alderantziz).
 	 */
 	$scope.funtzioaAldatu = function() {
-		funtzioaAldatu(++funtzioa % 2);
+		var zertara = (funtzioa == 0) ? "irteeretara" : "sarreretara";
+		if (window.confirm("Ziur " + zertara + "aldatu nahi duzula?"))
+			funtzioaAldatu(++funtzioa % 2);
 	};
 
 	/**
@@ -216,7 +218,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 						sarrera.testua = sarrera.ordua + " " + sarrera.kopurua
 								+ " " + sarrera.mota
 								+ " (ERROREA: ezin izan da konektatu)";
-						sarrera.cssClass =  "sarreraErrorea";
+						sarrera.cssClass = "sarreraErrorea";
 						bidaliGabekoak.push(sarrera);
 						if (funtzioa == 0)
 							$scope.bidaliGabeSarrerak += sarrera.kopurua;
@@ -252,7 +254,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 				bidaliGabekoak.push(sarrera);
 		}).error(function() {
 			sarrera.bidaltzen = false;
-			sarrera.cssClass =  "sarreraErrorea";
+			sarrera.cssClass = "sarreraErrorea";
 			bidaliGabekoak.push(sarrera);
 		});
 	}
@@ -275,7 +277,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 				} else {
 					aux.testua = aux.ordua + " " + aux.kopurua + " " + aux.mota
 							+ " (BIDALITA)";
-					aux.cssClass =  "sarreraOndo";
+					aux.cssClass = "sarreraOndo";
 					if (aux.mota = "sarrera")
 						$scope.bidaliGabeSarrerak -= aux.kopurua;
 					else if (aux.mota = "irteera")
@@ -308,7 +310,7 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 			if (!aux.bidaltzen) {
 				if (aux.bidalita) {
 					aux.testua = "URRATUA";
-					aux.cssClass =  "sarreraOndo";
+					aux.cssClass = "sarreraOndo";
 					bidaliGabekoak.splice(i, 1);
 				} else {
 					aux.bidaltzen = true;
@@ -379,3 +381,13 @@ app.controller('AforoController', function($scope, $http, $location, $timeout,
 		}
 	};
 });
+
+app.run([ '$rootScope', function($rootScope) {
+	$rootScope.$on('$locationChangeStart', function(event, newUrl, oldUrl) {
+		console.log("newUrl:" + newUrl); // http://localhost:3000/#/articles/new
+		console.log("oldUrl: " + oldUrl); // http://localhost:3000/#/articles
+		if ((newUrl != "file:///android_asset/www/index.html#/aforo") && (oldUrl == "file:///android_asset/www/index.html#/aforo"))
+			if (! window.confirm("Ziur loginera atera nahi duzula?"))
+				event.preventDefault(); // This prevents the navigation from happening
+	});
+} ]);
