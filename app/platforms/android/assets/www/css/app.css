@@ -7,7 +7,9 @@ h1 {
 }
 
 .aldatu {
-	float: right;
+	position: absolute;
+	top: 3px;
+	right: 10px;
 }
 
 .error {
@@ -25,7 +27,7 @@ h1 {
 
 #list {
 	width: 90%;
-	height: 100px;
+	height: 150px;
 	overflow-y: scroll;
 	margin-left: auto;
 	margin-right: auto;
